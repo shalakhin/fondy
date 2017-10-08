@@ -3,7 +3,7 @@ import hashlib
 import requests
 
 
-class FondyAPI(object):
+class API(object):
     """Basic Fondy API Wrapper"""
     ENDPOINTS = {
         'order_status': 'https://api.fondy.eu/api/status/order_id',
