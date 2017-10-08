@@ -4,7 +4,7 @@ Fondy.eu Python SDK
 
 ## Install
 
-```
+```shell
 pip install fondy
 ```
 
@@ -12,6 +12,6 @@ pip install fondy
 
 ```python
 from fondy import API
-fondy = API(merchant_id, password, key)
-fondy.invoice('20.00', 'UAH')
+api = API(merchant_id, password, key)
+api.invoice('20.00', 'UAH')
 ```
