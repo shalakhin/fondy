@@ -1,19 +1,77 @@
 import json
 import hashlib
 import requests
+from .currencies import CURRENCIES
 
 
-class API(object):
+class API:
     """Basic Fondy API Wrapper"""
+    URL_ROOT = 'https://api.fondy.eu/api'
     ENDPOINTS = {
-        'order_status': 'https://api.fondy.eu/api/status/order_id',
-        'p2pcredit': 'https://api.fondy.eu/api/p2pcredit/'
+        'order_status': '/status/order_id',
+        'p2pcredit': '/p2pcredit/',
+        'checkout': '/checkout/redirect/',
+        'checkout_url': '/checkout/url/',
     }
 
-    def __init__(self, merchant_id, password, key, *args, **kwargs):
+    def __init__(self, merchant_id=None, merchant_key=None,
+                 server_callback_url=None, *args, **kwargs):
         self.merchant_id = merchant_id
-        self.password = password
-        self.key = key
+        self.merchant_key = merchant_key
+        self.server_callback_url = server_callback_url
+
+    @staticmethod
+    def url(self, action: "action from the ENDPOINTS list"=str) -> str:
+        """
+        Builds URL to use
+        :param self:
+        :param action
+        :return: url string
+        """
+        assert action in self.ENDPOINTS, "%s is not within allowed: %s" % (
+            action, ', '.join(self.ENDPOINTS.keys()))
+        return '%s%s' % (self.URL_ROOT, self.ENDPOINTS[action])
+
+    def request(self, method: "get or post"=str,
+                action: "one of the ENDPOINT keys"=str,
+                data: "data to send as dictionary"=dict) -> dict:
+        """
+        :param method:
+        :param action:
+        :param data:
+        :return:
+        """
+        assert method in ['get', 'post'], "%s method is not allowed" % method
+        assert isinstance(data, dict), "data must be dictionary"
+        assert action in self.ENDPOINTS, "action %s is not allowed" % action
+
+        headers = {'Content-Type': 'application/json'}
+        params = {
+            "url": self.url(action),
+            "data": self.sign(data),
+            "headers": headers
+        }
+        return getattr(requests, method)(**params).json()
+
+    def get(self, action: "one of the ENDPOINT keys"=str,
+            data: "data to send as dictionary"=dict) -> dict:
+        """
+        Wrapper around self.request to simplify get requests
+        :param action:
+        :param data:
+        :return:
+        """
+        return self.request('get', action, data)
+
+    def post(self, action: "one of the ENDPOINT keys"=str,
+             data: "data to send as dictionary"=dict) -> dict:
+        """
+        Wrapper around self.request to simplify post requests
+        :param action:
+        :param data:
+        :return:
+        """
+        return self.request('post', action, data)
 
     def sign(self, data):
         """
@@ -35,8 +93,13 @@ class API(object):
         keys = sorted(data['request'].keys())
         values = [self.key]
         values += [data['request'][key] for key in keys]
-        raw = '|'.join(values)
-        data['request']['signature'] = hashlib.sha1(raw.encode('utf-8')).hexdigest()
+        try:
+            raw = '|'.join(values)
+        except Exception as e:
+            raise Exception(e, values)
+
+        raw_data = raw.encode('utf-8')
+        data['request']['signature'] = hashlib.sha1(raw_data).hexdigest()
 
         return json.dumps(data)
 
@@ -52,9 +115,7 @@ class API(object):
                 'merchant_id': self.merchant_id,
             }
         }
-        endpoint = self.ENDPOINTS['order_status']
-        headers = {'Content-Type': 'application/json'}
-        return requests.post(endpoint, data=self.sign(data), headers=headers)
+        return self.post('order_status', data)
 
     def p2pcredit(self, order_id):
         assert type(order_id) is str
@@ -64,6 +125,25 @@ class API(object):
                 'merchant_id': self.merchant_id,
             }
         }
-        endpoint = self.ENDPOINTS['p2pcredit']
-        headers = {'Content-Type': 'application/json'}
-        return requests.post(endpoint, data=self.sign(data), headers=headers)
+        return self.post('p2pcredit', data)
+
+    def checkout(self, order_id, amount, order_desc='',
+                 response_url=None, currency='UAH'):
+        assert currency in CURRENCIES, "%s is now valid currency" % currency
+
+        if not isinstance(order_id, str):
+            order_id = str(order_id)
+
+        data = {
+            "request": {
+                "server_callback_url": self.server_callback_url,
+                'response_url': response_url,
+                "order_id": order_id,
+                "currency": currency,
+                "merchant_id": str(self.merchant_id),
+                "order_desc": order_desc,
+                # amount must be in "cents"
+                "amount": str(amount),
+            }
+        }
+        return self.post('checkout_url', data)
