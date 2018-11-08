@@ -4,7 +4,7 @@ from distutils.core import setup
 setup(
     name='fondy',
     packages=['fondy'],
-    version='0.1',
+    version='0.2.0',
     description='Python library for the Fondy API',
     author='Olexandr Shalakhin',
     author_email='olexandr@shalakhin.com',
