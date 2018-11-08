@@ -19,8 +19,8 @@ api.checkout('123456', 200 * 100)
 
 ## Supported API endpoints
 
-|----------------|----------------------|
 |Endpoint        |Explanation           |
+|----------------|----------------------|
 |order_status    |Check order status    |
 |p2pcredit       |Pay to credit card    |
 |checkout        |Generate checkout URL |
