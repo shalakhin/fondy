@@ -20,7 +20,6 @@ class API:
         self.merchant_key = merchant_key
         self.server_callback_url = server_callback_url
 
-    @staticmethod
     def url(self, action: "action from the ENDPOINTS list"=str) -> str:
         """
         Builds URL to use
