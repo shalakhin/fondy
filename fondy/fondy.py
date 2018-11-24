@@ -90,7 +90,7 @@ class API:
         """
         assert 'request' in data.keys()
         keys = sorted(data['request'].keys())
-        values = [self.key]
+        values = [self.merchant_key]
         values += [data['request'][key] for key in keys]
         try:
             raw = '|'.join(values)

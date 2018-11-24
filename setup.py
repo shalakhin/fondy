@@ -7,14 +7,14 @@ with open("README.md", "r") as fh:
 setup(
     name='fondy',
     packages=['fondy'],
-    version='0.3.4',
+    version='0.3.5',
     description='Python library for the Fondy API',
     long_description=long_description,
     long_description_content_type="text/markdown",
     author='Olexandr Shalakhin',
     author_email='olexandr@shalakhin.com',
     url='https://github.com/shalakhin/fondy',
-    download_url='https://github.com/shalakhin/fondy/archive/0.3.4.tar.gz',
+    download_url='https://github.com/shalakhin/fondy/archive/0.3.5.tar.gz',
     keywords=['testing', 'logging', 'example'],
     requires=['requests'],
     classifiers=[
